@@ -1,2 +1,4 @@
 .idea
+vector_store
+documents
 **.env
