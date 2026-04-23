@@ -11,10 +11,10 @@ MAIN_MENU_CHOICES: Final[list[Choice]] = [
         title="Query", value=query
     ),
     Choice(
-        title="Index documents into vector store", value=index_documents_in_vector_store
+        title="Index Documents in Vector Store", value=index_documents_in_vector_store
     ),
     Choice(
-        title="Purge vector store", value=purge_vector_store
+        title="Purge Vector Store", value=purge_vector_store
     ),
     Choice(
         title="Quit", value=quit_program

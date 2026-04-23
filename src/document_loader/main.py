@@ -2,6 +2,7 @@ from src.exceptions.path import DirectoryDoesNotExistError, EmptyDirectoryError
 import langchain_community.document_loaders as lc_doc_loader
 from langchain_core.documents import Document
 from pathlib import Path
+from loguru import logger
 from enum import Enum
 import os
 
@@ -26,6 +27,7 @@ def lazy_load_documents(documents_path: str) -> list[Document]:
     :param documents_path: The directory to load documents from.
     :return: List of Document objects.
     """
+    logger.info("Loading documents...")
     if not os.path.isdir(documents_path):
         raise DirectoryDoesNotExistError(documents_path)
 

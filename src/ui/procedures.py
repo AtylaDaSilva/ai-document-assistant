@@ -19,7 +19,11 @@ def index_documents_in_vector_store(env: dict[str, str]) -> None:
     documents = lazy_load_documents(env["DOCUMENTS_PATH"])
 
     # Add documents to vector store
+    logger.info("Adding documents to vector store...")
     vector_store.add_documents(documents)
+
+    # Success
+    logger.success("Successfully indexed documents in vector store.")
 
 
 def purge_vector_store(env: dict[str, str]) -> None:
