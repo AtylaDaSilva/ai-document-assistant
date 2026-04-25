@@ -1,5 +1,7 @@
-from src.vector_store.main import get_vector_store
+from src.vector_store.main import get_vector_store, filter_sim_search_by_relevance_score
 from src.document_loader.main import lazy_load_documents
+from langchain_core.documents import Document
+from src.utils import yaml
 import questionary
 from loguru import logger
 
@@ -7,9 +9,22 @@ from loguru import logger
 def query(env: dict[str, str]) -> None:
     question = questionary.text("What would you like to ask?").ask()
     logger.info(f"Question asked: {question}")
-    logger.info("Performing similarity search...")
+
+    results_count = int(env["SIMILARITY_SEARCH_RESULTS_COUNT"])
+    relevance_score_cutoff = float(env["SIMILARITY_SEARCH_RELEVANCE_CUTOFF"])
+    logger.info(f"Performing similarity search (K={results_count}, Relevance cutoff={relevance_score_cutoff})...")
+
+    # Search vector store for relevant results
     vector_store = get_vector_store(env)
-    sim_search_results = vector_store.similarity_search_with_score(question, k=2)
+    sim_search_results: list[tuple[Document, float]] = filter_sim_search_by_relevance_score(
+        vector_store.similarity_search_with_relevance_scores(question, k=results_count),
+        relevance_score=relevance_score_cutoff,
+    )
+
+    # Create LLM message template
+    query_context = "\n\n---\n\n".join([doc.page_content for doc, score in sim_search_results])
+    directives = yaml.parse_yaml("./directives.yaml")
+    # ! TO BE CONTINUED...
 
 
 
