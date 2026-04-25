@@ -2,3 +2,4 @@
 vector_store
 documents
 **.env
+**__pycache__
