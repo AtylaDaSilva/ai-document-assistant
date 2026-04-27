@@ -9,6 +9,8 @@ import questionary
 from loguru import logger
 from typing import Any
 from pprint import pprint
+import shutil
+import os
 
 
 def query(env: dict[str, str]) -> None:
@@ -63,8 +65,10 @@ def index_documents_in_vector_store(env: dict[str, str]) -> None:
 
 
 def purge_vector_store(env: dict[str, str]) -> None:
-    print("Purging...")
-
+    print("Purging vector store...")
+    vector_store_path: str = env["VECTOR_STORE_PERSIST_PATH"]
+    if os.path.exists(vector_store_path):
+        shutil.rmtree(vector_store_path)
 
 def quit_program(env: dict[str, str]) -> None:
     print("Goodbye!")
