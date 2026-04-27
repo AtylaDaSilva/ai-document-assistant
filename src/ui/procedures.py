@@ -30,7 +30,9 @@ def query(env: dict[str, str]) -> None:
 
     # Create LLM message template
     query_context = "\n\n---\n\n".join([doc.page_content for doc, score in sim_search_results])
+    logger.info(f"Context: {query_context}")
     directives: dict[str, Any] = yaml.parse_yaml("./directives.yaml")
+    logger.info(f"Directives: {directives}")
     chat_model_args = {"model": env["LLM_MODEL"], "temperature": int(env["LLM_TEMPERATURE"])}
     chat_model: BaseChatModel = ChatModels[env["CHAT_MODEL"].upper()].value(**chat_model_args)
 
