@@ -76,3 +76,13 @@ def quit_program(env: dict[str, str]) -> None:
     print("Goodbye!")
     logger.info("PROCESS END")
     exit(0)
+
+
+# Test procedures
+
+def test_log_sinks(env: dict[str, str]):
+    logger.info("This is an INFO level log")
+    logger.warning("This is a WARNING level log")
+    logger.error("This is an ERROR level log")
+    logger.critical("This is a CRITICAL level log")
+    logger.debug("This is a DEBUG level log")
