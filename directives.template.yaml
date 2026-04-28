@@ -1,3 +1,8 @@
+# This is a TEMPLATE file. Make sure to create a copy of this file and rename it to directives.yaml
+#/*
+#  Directives for the AI chatbot. Bellow are a few general directives.
+#  Include (or remove) as many as you'd like to tailor how you want the chatbot to behave.
+#*/
 ai_assistant:
   - You are a helpful assistant that helps users with questions about a specific text document.
   - Only answer questions with the given context.
