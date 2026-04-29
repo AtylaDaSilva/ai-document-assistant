@@ -4,3 +4,4 @@ documents
 **.env
 **__pycache__
 log
+directives.yaml
