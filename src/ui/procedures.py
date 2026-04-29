@@ -1,10 +1,11 @@
 from src.vector_store.main import get_vector_store, filter_sim_search_by_relevance_score
 from src.document_loader.main import lazy_load_documents
 from src.chat_models.main import ChatModels
+from src.utils import yaml
+from src.logging.main import flog
 from langchain_core.documents import Document
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages.ai import AIMessage
-from src.utils import yaml
 import questionary
 from loguru import logger
 from typing import Any
@@ -28,11 +29,13 @@ def query(env: dict[str, str]) -> None:
         relevance_score=relevance_score_cutoff,
     )
 
+    logger.info(f"Similarity search results: {flog(sim_search_results)}")
+
     # Create LLM message template
     query_context = "\n\n---\n\n".join([doc.page_content for doc, score in sim_search_results])
-    logger.info(f"Context: {query_context}")
+    logger.info(f"Context: {flog(query_context)}")
     directives: dict[str, Any] = yaml.parse_yaml("./directives.yaml")
-    logger.info(f"Directives: {directives}")
+    logger.info(f"Directives: {flog(directives)}")
     chat_model_args = {"model": env["LLM_MODEL"], "temperature": int(env["LLM_TEMPERATURE"])}
     chat_model: BaseChatModel = ChatModels[env["CHAT_MODEL"].upper()].value(**chat_model_args)
 
@@ -46,6 +49,7 @@ def query(env: dict[str, str]) -> None:
 
     # Invoke chat model
     response: AIMessage = chat_model.invoke(messages)
+    logger.info(f"Chatbot response: {flog(response)}")
     pprint(response.content)
     return
 
@@ -55,8 +59,12 @@ def index_documents_in_vector_store(env: dict[str, str]) -> None:
     # Initialize Vector Store and Embeddings
     vector_store = get_vector_store(env)
 
+    logger.info(f"Vector store: {flog(vector_store)}")
+
     # Load documents into memory
     documents = lazy_load_documents(env["DOCUMENTS_PATH"])
+
+    logger.info(f"Documents: {flog(documents)}")
 
     # Add documents to vector store
     logger.info("Adding documents to vector store...")
@@ -67,13 +75,14 @@ def index_documents_in_vector_store(env: dict[str, str]) -> None:
 
 
 def purge_vector_store(env: dict[str, str]) -> None:
-    print("Purging vector store...")
+    logger.warning("Purging vector store...")
     vector_store_path: str = env["VECTOR_STORE_PERSIST_PATH"]
     if os.path.exists(vector_store_path):
         shutil.rmtree(vector_store_path)
+        logger.warning(f"Vector store at '{vector_store_path}' was successfully purged.")
 
 def quit_program(env: dict[str, str]) -> None:
-    print("Goodbye!")
+    logger.success("Goodbye!")
     logger.info("PROCESS END")
     exit(0)
 

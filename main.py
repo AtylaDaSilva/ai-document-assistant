@@ -16,8 +16,7 @@ def main():
         # Main menu
         menus.main_menu(env)
     except Exception as err:
-        # TODO: implement logging
-        print("Unhandled exception caught: ", err)
+        logger.critical(f"Unhandled exception caught: {err}")
     except (DirectoryDoesNotExistError, EmptyDirectoryError) as dir_err:
         print(dir_err)
 
