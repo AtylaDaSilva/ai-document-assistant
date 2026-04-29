@@ -50,7 +50,7 @@ def query(env: dict[str, str]) -> None:
     # Invoke chat model
     response: AIMessage = chat_model.invoke(messages)
     logger.info(f"Chatbot response: {flog(response)}")
-    pprint(response.content)
+    response.pretty_print()
     return
 
 
