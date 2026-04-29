@@ -55,7 +55,8 @@ def query(env: dict[str, str]) -> None:
 
 
 def index_documents_in_vector_store(env: dict[str, str]) -> None:
-    logger.info("Indexing documents in vector store...")
+    logger.info("Indexing documents in Vector Store...")
+    print("Indexing documents in Vector Store...")
     # Initialize Vector Store and Embeddings
     vector_store = get_vector_store(env)
 
@@ -72,17 +73,20 @@ def index_documents_in_vector_store(env: dict[str, str]) -> None:
 
     # Success
     logger.success("Successfully indexed documents in vector store.")
+    print("Successfully indexed documents in vector store.")
 
 
 def purge_vector_store(env: dict[str, str]) -> None:
-    logger.warning("Purging vector store...")
+    logger.warning("Purging Vector Store...")
+    print("Purging Vector Store...")
     vector_store_path: str = env["VECTOR_STORE_PERSIST_PATH"]
     if os.path.exists(vector_store_path):
         shutil.rmtree(vector_store_path)
         logger.warning(f"Vector store at '{vector_store_path}' was successfully purged.")
+        print(f"Vector store at '{vector_store_path}' was successfully purged.")
 
 def quit_program(env: dict[str, str]) -> None:
-    logger.success("Goodbye!")
+    print("Goodbye!")
     logger.info("PROCESS END")
     exit(0)
 
