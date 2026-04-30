@@ -9,7 +9,9 @@ from langchain_core.messages.ai import AIMessage
 import questionary
 from loguru import logger
 from typing import Any
-from pprint import pprint
+from alive_progress.styles import show_spinners
+from alive_progress import alive_bar
+from time import sleep
 import shutil
 import os
 
@@ -18,40 +20,41 @@ def query(env: dict[str, str]) -> None:
     question = questionary.text("What would you like to ask?").ask()
     logger.info(f"Question asked: {question}")
 
-    results_count = int(env["SIMILARITY_SEARCH_RESULTS_COUNT"])
-    relevance_score_cutoff = float(env["SIMILARITY_SEARCH_RELEVANCE_CUTOFF"])
-    logger.info(f"Performing similarity search (K={results_count}, Relevance cutoff={relevance_score_cutoff})...")
+    with alive_bar(1, title="Thinking") as spinner:
+        spinner()
+        results_count = int(env["SIMILARITY_SEARCH_RESULTS_COUNT"])
+        relevance_score_cutoff = float(env["SIMILARITY_SEARCH_RELEVANCE_CUTOFF"])
+        logger.info(f"Performing similarity search (K={results_count}, Relevance cutoff={relevance_score_cutoff})...")
 
-    # Search vector store for relevant results
-    vector_store = get_vector_store(env)
-    sim_search_results: list[tuple[Document, float]] = filter_sim_search_by_relevance_score(
-        vector_store.similarity_search_with_relevance_scores(question, k=results_count),
-        relevance_score=relevance_score_cutoff,
-    )
+        # Search vector store for relevant results
+        vector_store = get_vector_store(env)
+        sim_search_results: list[tuple[Document, float]] = filter_sim_search_by_relevance_score(
+            vector_store.similarity_search_with_relevance_scores(question, k=results_count),
+            relevance_score=relevance_score_cutoff,
+        )
 
-    logger.info(f"Similarity search results: {flog(sim_search_results)}")
+        logger.info(f"Similarity search results: {flog(sim_search_results)}")
 
-    # Create LLM message template
-    query_context = "\n\n---\n\n".join([doc.page_content for doc, score in sim_search_results])
-    logger.info(f"Context: {flog(query_context)}")
-    directives: dict[str, Any] = yaml.parse_yaml("./directives.yaml")
-    logger.info(f"Directives: {flog(directives)}")
-    chat_model_args = {"model": env["LLM_MODEL"], "temperature": int(env["LLM_TEMPERATURE"])}
-    chat_model: BaseChatModel = ChatModels[env["CHAT_MODEL"].upper()].value(**chat_model_args)
+        # Create LLM message template
+        query_context = "\n\n---\n\n".join([doc.page_content for doc, score in sim_search_results])
+        logger.info(f"Context: {flog(query_context)}")
+        directives: dict[str, Any] = yaml.parse_yaml("./directives.yaml")
+        logger.info(f"Directives: {flog(directives)}")
+        chat_model_args = {"model": env["LLM_MODEL"], "temperature": int(env["LLM_TEMPERATURE"])}
+        chat_model: BaseChatModel = ChatModels[env["CHAT_MODEL"].upper()].value(**chat_model_args)
 
-    # System directives
-    messages = [("system", d) for d in directives["ai_assistant"]]
-    # Context & user message
-    messages.extend([
-        ("system", f"Here is the context to the question: {query_context}"),
-        ("user", question),
-    ])
+        # System directives
+        messages = [("system", d) for d in directives["ai_assistant"]]
+        # Context & user message
+        messages.extend([
+            ("system", f"Here is the context to the question: {query_context}"),
+            ("user", question),
+        ])
 
-    # Invoke chat model
-    response: AIMessage = chat_model.invoke(messages)
-    logger.info(f"Chatbot response: {flog(response)}")
+        # Invoke chat model
+        response: AIMessage = chat_model.invoke(messages)
+        logger.info(f"Chatbot response: {flog(response)}")
     response.pretty_print()
-    return
 
 
 def index_documents_in_vector_store(env: dict[str, str]) -> None:
@@ -99,3 +102,11 @@ def test_log_sinks(env: dict[str, str]):
     logger.error("This is an ERROR level log")
     logger.critical("This is a CRITICAL level log")
     logger.debug("This is a DEBUG level log")
+
+
+def test_menu_spinners(env: dict[str, str]):
+    with alive_bar(1, title="Testing") as bar:
+        bar()
+        sleep(5)
+    print("Here's some text")
+    #show_spinners()  # Shows a list of supported spinners
